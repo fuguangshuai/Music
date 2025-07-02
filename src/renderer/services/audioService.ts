@@ -57,10 +57,10 @@ class AudioService {
     // 从本地存储加载 EQ 开关状态
     const bypassState = localStorage.getItem('eqBypass');
     this.bypass = bypassState ? JSON.parse(bypassState) : false;
-    
+
     // 页面加载时立即强制重置操作锁
     this.forceResetOperationLock();
-    
+
     // 添加页面可见性变化监听器 - 解决移动端后台播放问题
     document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
 
@@ -382,12 +382,12 @@ class AudioService {
   private setOperationLock(): boolean {
     // 生成唯一的锁ID
     const lockId = Date.now().toString() + Math.random().toString(36).substring(2, 9);
-    
+
     // 如果锁已经存在，检查是否超时
     if (this.operationLock) {
       const currentTime = Date.now();
       const lockDuration = currentTime - this.operationLockStartTime;
-      
+
       // 如果锁持续时间超过2秒，直接强制重置
       if (lockDuration > 2000) {
         console.warn(`操作锁已激活 ${lockDuration}ms，超过安全阈值，强制重置`);
@@ -397,11 +397,11 @@ class AudioService {
         return false;
       }
     }
-    
+
     this.operationLock = true;
     this.operationLockStartTime = Date.now();
     this.operationLockId = lockId;
-    
+
     // 将锁信息存储到 localStorage（仅用于调试，实际不依赖此值）
     try {
       localStorage.setItem('audioOperationLock', JSON.stringify({
@@ -411,33 +411,33 @@ class AudioService {
     } catch (error) {
       console.error('存储操作锁信息失败:', error);
     }
-    
+
     // 清除之前的定时器
     if (this.operationLockTimer) {
       clearTimeout(this.operationLockTimer);
     }
-    
+
     // 设置超时自动释放锁
     this.operationLockTimer = setTimeout(() => {
       console.warn('操作锁超时自动释放');
       this.releaseOperationLock();
     }, this.operationLockTimeout);
-    
+
     return true;
   }
-  
+
   // 释放操作锁
   public releaseOperationLock(): void {
     this.operationLock = false;
     this.operationLockStartTime = 0;
-    
+
     // 从 localStorage 中移除锁信息
     try {
       localStorage.removeItem('audioOperationLock');
     } catch (error) {
       console.error('清除存储的操作锁信息失败:', error);
     }
-    
+
     if (this.operationLockTimer) {
       clearTimeout(this.operationLockTimer);
       this.operationLockTimer = null;
@@ -450,12 +450,12 @@ class AudioService {
     this.operationLock = false;
     this.operationLockStartTime = 0;
     this.operationLockId = '';
-    
+
     if (this.operationLockTimer) {
       clearTimeout(this.operationLockTimer);
       this.operationLockTimer = null;
     }
-    
+
     // 清除存储的锁
     localStorage.removeItem('audioOperationLock');
   }
@@ -467,22 +467,22 @@ class AudioService {
       console.log('首次播放请求，强制重置操作锁');
       this.forceResetOperationLock();
     }
-    
+
     // 如果操作锁已激活，但持续时间超过安全阈值，强制重置
     if (this.operationLock) {
       const currentTime = Date.now();
       const lockDuration = currentTime - this.operationLockStartTime;
-      
+
       if (lockDuration > 2000) {
         console.warn(`操作锁已激活 ${lockDuration}ms，超过安全阈值，强制重置`);
         this.forceResetOperationLock();
       }
     }
-    
+
     // 获取锁
     if (!this.setOperationLock()) {
       console.log('audioService: 操作锁激活，强制执行当前播放请求');
-      
+
       // 如果只是要继续播放当前音频，直接执行
       if (this.currentSound && !url && !track) {
         if (this.seekLock && this.seekDebounceTimer) {
@@ -492,10 +492,10 @@ class AudioService {
         this.currentSound.play();
         return Promise.resolve(this.currentSound);
       }
-      
+
       // 强制释放锁并继续执行
       this.forceResetOperationLock();
-      
+
       // 这里不再返回错误，而是继续执行播放逻辑
     }
 
@@ -607,13 +607,13 @@ class AudioService {
               try {
                 // 初始化音频管道
                 await this.setupEQ(this.currentSound!);
-                
+
                 // 重新应用已保存的音量
                 const savedVolume = localStorage.getItem('volume');
                 if (savedVolume) {
                   this.applyVolume(parseFloat(savedVolume));
                 }
-                
+
                 // 音频加载成功后设置 EQ 和更新媒体会话
                 if (this.currentSound) {
                   try {
@@ -691,7 +691,7 @@ class AudioService {
   stop() {
     // 强制重置操作锁并继续执行
     this.forceResetOperationLock();
-    
+
     try {
       if (this.currentSound) {
         try {
@@ -707,7 +707,7 @@ class AudioService {
         }
         this.currentSound = null;
       }
-      
+
       this.currentTrack = null;
       if ('mediaSession' in navigator) {
         navigator.mediaSession.playbackState = 'none';
@@ -725,7 +725,7 @@ class AudioService {
   seek(time: number) {
     // 直接强制重置操作锁
     this.forceResetOperationLock();
-    
+
     if (this.currentSound) {
       try {
         // 直接执行seek操作
@@ -741,7 +741,7 @@ class AudioService {
 
   pause() {
     this.forceResetOperationLock();
-    
+
     if (this.currentSound) {
       try {
         // 确保任何进行中的seek操作被取消
@@ -801,10 +801,10 @@ class AudioService {
   private applyVolume(volume: number) {
     // 确保值在0到1之间
     const normalizedVolume = Math.max(0, Math.min(1, volume));
-    
+
     // 使用线性缩放音量
     const linearVolume = normalizedVolume;
-    
+
     // 将音量应用到所有相关节点
     if (this.gainNode) {
       // 立即设置音量
@@ -813,28 +813,28 @@ class AudioService {
     } else {
       this.currentSound?.volume(linearVolume);
     }
-    
+
     // 保存值
     localStorage.setItem('volume', linearVolume.toString());
-    
+
     console.log('Volume applied (linear):', linearVolume);
   }
 
   // 添加方法检查当前音频是否在加载状态
   isLoading(): boolean {
     if (!this.currentSound) return false;
-    
+
     // 检查Howl对象的内部状态
     // 如果状态为1表示已经加载但未完成，状态为2表示正在加载
     const state = (this.currentSound as any)._state;
     // 如果操作锁激活也认为是加载状态
     return this.operationLock || (state === 'loading' || state === 1);
   }
-  
+
   // 检查音频是否真正在播放
   isActuallyPlaying(): boolean {
     if (!this.currentSound) return false;
-    
+
     try {
       // 综合判断: 
       // 1. Howler API是否报告正在播放
@@ -843,9 +843,9 @@ class AudioService {
       const isPlaying = this.currentSound.playing();
       const isLoading = this.isLoading();
       const contextRunning = Howler.ctx && Howler.ctx.state === 'running';
-      
+
       console.log(`实际播放状态检查: playing=${isPlaying}, loading=${isLoading}, contextRunning=${contextRunning}`);
-      
+
       // 只有在三个条件都满足时才认为是真正在播放
       return isPlaying && !isLoading && contextRunning;
     } catch (error) {
@@ -857,17 +857,32 @@ class AudioService {
   // 处理页面可见性变化
   private handleVisibilityChange(): void {
     const isHidden = document.hidden;
+    console.log(`页面可见性变化: 隐藏=${isHidden}`);
 
     if (isHidden) {
       // 页面隐藏时保持音频上下文活动
-      if (Howler.ctx && Howler.ctx.state === 'running') {
-        // 移动端音频焦点保持
-        this.createSilentAudio();
+      if (Howler.ctx && Howler.ctx.state !== 'running') {
+        // 尝试恢复音频上下文
+        Howler.ctx.resume().catch(e => console.error('恢复音频上下文失败:', e));
+      }
 
-        // 确保当前音频继续播放
-        if (this.currentSound && this.currentSound.playing()) {
-          // 标记当前正在播放
-          localStorage.setItem('audio_was_playing', 'true');
+      // 移动端音频焦点保持
+      this.createSilentAudio();
+
+      // 确保当前音频继续播放
+      if (this.currentSound) {
+        // 标记当前播放状态
+        const isPlaying = this.currentSound.playing();
+        localStorage.setItem('audio_was_playing', isPlaying ? 'true' : 'false');
+
+        // 如果正在播放，确保继续播放
+        if (isPlaying) {
+          // 对于一些平台，需要重新触发播放
+          setTimeout(() => {
+            if (this.currentSound && !this.currentSound.playing() && localStorage.getItem('audio_was_playing') === 'true') {
+              this.currentSound.play();
+            }
+          }, 100);
         }
       }
     } else {
@@ -884,6 +899,9 @@ class AudioService {
         }).catch(error => {
           console.error('恢复音频上下文失败:', error);
         });
+      } else if (wasPlaying && this.currentSound && !this.currentSound.playing()) {
+        // 即使上下文正常，也确保音乐在恢复时播放
+        this.currentSound.play();
       }
 
       // 清除标记
@@ -891,24 +909,35 @@ class AudioService {
     }
   }
 
-  // 创建静音音频以保持音频焦点（iOS专用）
+  // 创建静音音频以保持音频焦点（移动端专用）
   private createSilentAudio(): void {
     // 创建一个极短的静音音频
     const silentAudio = new Audio();
     silentAudio.setAttribute('src', 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
     silentAudio.loop = true;
+    silentAudio.autoplay = true; // 自动播放很重要
+    silentAudio.muted = true; // 设置为静音
+    document.body.appendChild(silentAudio); // 将元素添加到DOM
 
     try {
       // 尝试播放静音音频以保持音频焦点
       const playPromise = silentAudio.play();
 
       if (playPromise !== undefined) {
-        playPromise.catch(error => {
+        playPromise.then(() => {
+          console.log('静音音频播放成功（保持音频焦点）');
+          // 播放成功后5秒移除元素
+          setTimeout(() => {
+            document.body.removeChild(silentAudio);
+          }, 5000);
+        }).catch(error => {
           console.log('静音音频播放被阻止:', error);
+          document.body.removeChild(silentAudio);
         });
       }
     } catch (e) {
       console.error('创建静音音频失败:', e);
+      document.body.removeChild(silentAudio);
     }
   }
 }
