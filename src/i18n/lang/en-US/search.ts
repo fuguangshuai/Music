@@ -21,7 +21,7 @@ export default {
     single: 'Single',
     album: 'Album',
     playlist: 'Playlist',
-    mv: 'MV',
-    bilibili: 'Bilibili'
+    mv: 'MV'//,
+    // bilibili: 'Bilibili'
   }
 };

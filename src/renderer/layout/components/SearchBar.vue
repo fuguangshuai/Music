@@ -92,10 +92,10 @@
               </template>
             </n-switch>
           </div>
-          <div class="menu-item" @click="restartApp">
+          <!-- <div class="menu-item" @click="restartApp">
             <i class="iconfont ri-restart-line"></i>
             <span>{{ t('comp.searchBar.restart') }}</span>
-          </div>
+          </div> -->
           <div class="menu-item" @click="selectItem('refresh')">
             <i class="iconfont ri-refresh-line"></i>
             <span>{{ t('comp.searchBar.refresh') }}</span>
@@ -197,9 +197,9 @@ watchEffect(() => {
   }
 });
 
-const restartApp = () => {
+/* const restartApp = () => {
   window.electron.ipcRenderer.send('restart');
-};
+}; */
 
 const toLogin = () => {
   router.push('/user');
