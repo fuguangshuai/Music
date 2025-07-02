@@ -63,6 +63,8 @@ request.interceptors.request.use(
       if (setData.enableRealIP && setData.realIP) {
         config.params.realIP = setData.realIP;
       }
+    } else {
+      config.params.realIP = "music.163.com";
     }
 
     return config;

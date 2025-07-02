@@ -7,7 +7,7 @@ import requestMusic from '@/utils/request_music';
 import { cloneDeep } from 'lodash';
 import { parseFromGDMusic } from './gdmusic';
 import type { SongResult } from '@/type/music';
-import { searchAndGetBilibiliAudioUrl } from './bilibili';
+// import { searchAndGetBilibiliAudioUrl } from './bilibili';
 
 const { addData, getData, deleteData } = musicDB;
 
@@ -87,23 +87,23 @@ export const getMusicLrc = async (id: number) => {
  * @param data 歌曲数据
  * @returns 解析结果
  */
-const getBilibiliAudio = async (data: SongResult) => {
-  const songName = data?.name || '';
-  const artistName = Array.isArray(data?.ar) && data.ar.length > 0 && data.ar[0]?.name ? data.ar[0].name : '';
-  const albumName = data?.al && typeof data.al === 'object' && data.al?.name ? data.al.name : '';
+// const getBilibiliAudio = async (data: SongResult) => {
+//   const songName = data?.name || '';
+//   const artistName = Array.isArray(data?.ar) && data.ar.length > 0 && data.ar[0]?.name ? data.ar[0].name : '';
+//   const albumName = data?.al && typeof data.al === 'object' && data.al?.name ? data.al.name : '';
   
-  const searchQuery = [songName, artistName, albumName].filter(Boolean).join(' ').trim();
-  console.log('开始搜索bilibili音频:', searchQuery);
+//   const searchQuery = [songName, artistName, albumName].filter(Boolean).join(' ').trim();
+//   console.log('开始搜索bilibili音频:', searchQuery);
   
-  const url = await searchAndGetBilibiliAudioUrl(searchQuery);
-  return {
-    data: {
-      code: 200,
-      message: 'success',
-      data: { url }
-    }
-  };
-};
+//   const url = await searchAndGetBilibiliAudioUrl(searchQuery);
+//   return {
+//     data: {
+//       code: 200,
+//       message: 'success',
+//       data: { url }
+//     }
+//   };
+// };
 
 /**
  * 从GD音乐台获取音频URL
@@ -176,9 +176,9 @@ export const getParsingMusicUrl = async (id: number, data: SongResult) => {
   // 2. 按优先级解析
   
   // 2.1 Bilibili解析(优先级最高)
-  if (musicSources.includes('bilibili')) {
-    return await getBilibiliAudio(data);
-  }
+  // if (musicSources.includes('bilibili')) {
+  //   return await getBilibiliAudio(data);
+  // }
   
   // 2.2 GD音乐台解析
   if (musicSources.includes('gdmusic')) {

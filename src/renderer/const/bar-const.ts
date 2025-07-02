@@ -37,11 +37,11 @@ export const SEARCH_TYPES = [
   {
     label: 'search.search.mv', // MV
     key: 1004
-  },
-  {
-    label: 'search.search.bilibili', // B站
-    key: 2000
-  }
+  }//,
+  // {
+  //   label: 'search.search.bilibili', // B站
+  //   key: 2000
+  // }
 ];
 
 

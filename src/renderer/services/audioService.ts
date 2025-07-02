@@ -61,6 +61,9 @@ class AudioService {
     // 页面加载时立即强制重置操作锁
     this.forceResetOperationLock();
     
+    // 添加页面可见性变化监听器 - 解决移动端后台播放问题
+    document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+
     // 添加页面卸载事件，确保离开页面时清除锁
     window.addEventListener('beforeunload', () => {
       this.forceResetOperationLock();
@@ -569,6 +572,11 @@ class AudioService {
             volume: 1, // 禁用 Howler.js 音量控制
             rate: this.playbackRate,
             format: ['mp3', 'aac'],
+            preload: true,
+            pool: 1,
+            onfade: () => {
+              // 处理音频淡入淡出事件，保持音频焦点
+            },
             onloaderror: (_, error) => {
               console.error('Audio load error:', error);
               if (retryCount < maxRetries) {
@@ -843,6 +851,64 @@ class AudioService {
     } catch (error) {
       console.error('检查播放状态出错:', error);
       return false;
+    }
+  }
+
+  // 处理页面可见性变化
+  private handleVisibilityChange(): void {
+    const isHidden = document.hidden;
+
+    if (isHidden) {
+      // 页面隐藏时保持音频上下文活动
+      if (Howler.ctx && Howler.ctx.state === 'running') {
+        // 移动端音频焦点保持
+        this.createSilentAudio();
+
+        // 确保当前音频继续播放
+        if (this.currentSound && this.currentSound.playing()) {
+          // 标记当前正在播放
+          localStorage.setItem('audio_was_playing', 'true');
+        }
+      }
+    } else {
+      // 页面恢复可见时
+      const wasPlaying = localStorage.getItem('audio_was_playing') === 'true';
+
+      // 恢复音频上下文
+      if (Howler.ctx && Howler.ctx.state === 'suspended') {
+        Howler.ctx.resume().then(() => {
+          // 如果之前在播放，尝试恢复播放
+          if (wasPlaying && this.currentSound && !this.currentSound.playing()) {
+            this.currentSound.play();
+          }
+        }).catch(error => {
+          console.error('恢复音频上下文失败:', error);
+        });
+      }
+
+      // 清除标记
+      localStorage.removeItem('audio_was_playing');
+    }
+  }
+
+  // 创建静音音频以保持音频焦点（iOS专用）
+  private createSilentAudio(): void {
+    // 创建一个极短的静音音频
+    const silentAudio = new Audio();
+    silentAudio.setAttribute('src', 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA');
+    silentAudio.loop = true;
+
+    try {
+      // 尝试播放静音音频以保持音频焦点
+      const playPromise = silentAudio.play();
+
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log('静音音频播放被阻止:', error);
+        });
+      }
+    } catch (e) {
+      console.error('创建静音音频失败:', e);
     }
   }
 }
