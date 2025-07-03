@@ -1,15 +1,13 @@
 <template>
   <div class="app-container" :class="{ mobile: isMobile, noElectron: !isElectron }">
-    <PasswordProtection>
-      <n-config-provider :theme="theme === 'dark' ? darkTheme : lightTheme">
-        <n-dialog-provider>
-          <n-message-provider>
-            <router-view></router-view>
-            <traffic-warning-drawer v-if="!isElectron"></traffic-warning-drawer>
-          </n-message-provider>
-        </n-dialog-provider>
-      </n-config-provider>
-    </PasswordProtection>
+    <n-config-provider :theme="theme === 'dark' ? darkTheme : lightTheme">
+      <n-dialog-provider>
+        <n-message-provider>
+          <router-view></router-view>
+          <traffic-warning-drawer v-if="!isElectron"></traffic-warning-drawer>
+        </n-message-provider>
+      </n-dialog-provider>
+    </n-config-provider>
   </div>
 </template>
 
@@ -19,7 +17,6 @@ import { darkTheme, lightTheme } from 'naive-ui';
 import { computed, nextTick, onMounted, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import PasswordProtection from '@/components/PasswordProtection.vue';
 
 // import TrafficWarningDrawer from '@/components/TrafficWarningDrawer.vue';
 
